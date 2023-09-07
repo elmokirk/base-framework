@@ -1,1 +1,1091 @@
 @import './_abstracts/index';
+@import './_globals/index';
+@import './_components/index';
+
+
+// variables
+// Basic Multiplier for all values || Fib or Bit values test
+// BaseRatio: 42
+
+// variables
+// Basic Multiplier for all values || Fib or Bit values test
+// BaseRatio: 42
+
+$breakpoints:(
+    base: 320px,
+    mobile: 560px,
+    tablet:  960px,
+    laptop: 1280px,
+    desktop: 1440px,
+    full:  1920px,
+);
+
+@mixin breakpoint($br, $to: 'unset'){
+  // from to breakpoints
+  @if $to != 'unset'{
+    @if map-has-key($breakpoints, $to){
+      @if map-has-key($breakpoints, $br){
+        $bpValue: (map-get($breakpoints, $to) - 0.1);
+        @media screen and (min-width: map-get($breakpoints, $br)) and (max-width: $bpValue){
+          @content;
+        }
+      }
+    }
+  }@else{
+    @if map-has-key($breakpoints, $br){
+      @media screen and (min-width: map-get($breakpoints, $br)){
+        @content;
+      }
+    }
+  }
+}
+
+// content spacer and settings
+// theme colors
+$themes: (
+  light: (
+    primary: #f719,
+    secondary: #00ccf050,
+    text: #000,
+    bg: #efefef,
+    dark: #333,
+    light: #f0f0f0,
+    border: #325c8c,
+    line: #d8b697,
+    card: #00ff00,
+    link: red,
+    overlay: #ffffff60,
+    ),
+    dark: (
+      primary: #f719,
+      secondary: #00ccf0,
+      text: #efefef,
+      bg: #333,
+      dark: #333,
+      light: #f719,
+      border: #325c8c,
+      line: #ebd9c8,
+      card: #e600ff,
+      link: red,
+      overlay: #00000030,
+    ),
+);  
+
+// 42 = 16 * 1,618
+
+$maxWidth: 1920px;
+/// ///Gap basics = base ratio
+/// font size calc to rem & em
+/// numb base 2 4 8 | 3 6 9 
+/// bases 16px to 18px
+/// 
+$gap: clamp(16px,#{calc(50vw - 100vw)} ,18px);
+/// // as long half screenW is smaller than 100vh
+$baseNumb: (
+  base: min(2, 3),
+  tablet: min(4, 6),
+  desktop: min(6, 9),
+);
+  
+$ratio: 1.618;
+// @function ratioCalc( $times, $r, $g){
+//   $baseCalc: math($r * $g);
+//   $value: math($baseCalc * $times);
+//   @return $value
+// }
+// delete
+$basePad: calc(42px / 4) calc(42px / 3);
+$baseMarg: calc(42px / 2) calc(42px * 2);
+
+// grid values
+// spacer and grid value from top
+$GridConfig: (
+  colW: 1fr,
+  minW: 320px,
+  maxW: $maxWidth,
+  cols: (
+    base: 12,
+    medium: 12,
+    large: 12
+  ),
+  swaps: (
+      base: mobile,
+      first: tablet,
+      second: desktop,
+  ),
+  colPresets:(),
+  rows: auto,
+  // row map = for each element of $rows 
+  row: (
+      header: 100vh,
+      main: auto,
+      footer: 70vh
+  )
+);
+
+// Typo Settings
+$mainFont: Arial;
+$textFont: 'Arial';
+
+// $baseBorder: 1px solid map-get($themes, map-get(light, border));
+$baseBorder: 1px dashed rgb(247, 237, 237);
+$borderRadius: 25%;
+$baseTransi: 420ms ease-in-out;
+
+
+// navi variables
+$naviH: 80px;
+$navBreak: laptop;
+$navFull: false;
+
+
+$cFill: #78209f;
+
+// theme generator in ROOT 
+// sync with chakra-ui variables later on
+@mixin themed($property: 'color', $colorVar: 'primary'){
+  body.dark &{
+    #{$property}: var(--#{$colorVar}--dark);
+  }
+  body.light &{
+    #{$property}: var(--#{$colorVar}--light);
+  }
+}
+
+:root{
+  color-scheme: light dark;
+  @each $theme, $map in $themes{
+    @each $key, $submap in $map{
+      --#{$key}--#{$theme}: #{$submap};
+    }
+  } 
+}
+
+/// body styles
+body{
+  // theme css var generator
+  @each $theme, $map in $themes{
+    &.#{$theme}{
+      @each $key, $submap in $map{
+        --#{$key}--#{$theme}: #{$submap};
+      }
+    }
+  }
+  &.noScroll{
+    @include breakpoint(#{$navBreak}){
+      overflow-y: scroll;
+    }
+  }
+}
+
+
+.test{
+  @include themed('background', 'text');
+}
+
+
+$spaceCalc: (
+  base: calc(#{$gap} * #{map-get($baseNumb, base)}),
+  tablet: calc(#{$gap} * #{map-get($baseNumb, tablet)}),
+  desktop: calc(#{$gap} * #{map-get($baseNumb, desktop)}), 
+);
+
+@mixin spacer(){
+  margin-top: map-get($spaceCalc, base);
+
+  @include breakpoint(tablet){
+    margin-top: map-get($spaceCalc, tablet);
+  }
+  @include breakpoint(desktop){
+    margin-top: map-get($spaceCalc, desktop);
+  }
+}
+
+@mixin bsPad($dir: 'all'){
+  @if $dir == 'all'{
+      padding: calc(#{$gap} * (#{$ratio} * 2) / 2) calc(#{$gap} * (#{$ratio} / 2));
+    @include breakpoint(tablet){
+      padding: calc(#{$gap} * (#{$ratio} * 1) * 2) calc(#{$gap} * (#{$ratio} * 1));
+    }
+    @include breakpoint(desktop){
+      padding: calc(#{$gap} * (#{$ratio} * 2) * 2) calc(#{$gap} * (#{$ratio} * 2));
+    }
+  }
+  @else if $dir == 'x'{
+    padding: 0 calc(#{$gap} * (#{$ratio} / 2));
+    @include breakpoint(tablet){
+      padding: 0 calc(#{$gap} * (#{$ratio} * 1));
+    }
+    @include breakpoint(desktop){
+      padding: 0 calc(#{$gap} * (#{$ratio} * 2));
+    }
+  }
+  @else if $dir == 'y'{
+    padding: calc(#{$gap} * (#{$ratio} * 2) / 2) 0;
+    @include breakpoint(tablet){
+      padding: calc(#{$gap} * (#{$ratio} * 1) * 2) 0;
+    }
+    @include breakpoint(desktop){
+      padding: calc(#{$gap} * (#{$ratio} * 2) * 2) 0;
+    }
+  }
+  @else if $dir == 'left'{
+    padding: 0 0 0 calc(#{$gap} * (#{$ratio} / 2));
+    @include breakpoint(tablet){
+      padding: 0 0 0 calc(#{$gap} * (#{$ratio} * 1));
+    }
+    @include breakpoint(desktop){
+      padding: 0 0 0 calc(#{$gap} * (#{$ratio} * 2));
+    }
+  }
+  @else if $dir == 'right'{
+    padding: 0 calc(#{$gap} * (#{$ratio} * 2) / 2) 0 0;
+    @include breakpoint(tablet){
+      padding: 0 calc(#{$gap} * (#{$ratio} * 1) * 2) 0 0;
+    }
+    @include breakpoint(desktop){
+      padding: 0 calc(#{$gap} * (#{$ratio} * 2) * 2) 0 0;
+    }
+  }
+}
+
+@mixin bsGap(){
+  gap: calc(#{$gap} / #{$ratio});
+  @include breakpoint(tablet){
+    gap: calc(#{$gap});
+  }
+  @include breakpoint(desktop){
+    gap: calc(#{$gap} * #{$ratio} +(#{$gap} * #{$ratio}));
+  }
+}
+
+
+
+//////////////////////// mixins
+/// // mixin for pseudoAtributes - edit each time
+@mixin pseudoAttr($clr, $prop...){
+  :hover{
+    @each $item in $prop{
+      #{$item}: lighten($clr, 20%); 
+    }
+  }
+  :active{
+    @each $item in $prop{
+      #{$item}: darken($clr, 10%); 
+    }
+  }
+  :focus, :focus-visible, :focus-within{
+    @each $item in $prop{
+      #{$item}: lighten($clr, 25%); 
+    }
+  }
+  :visited{
+    @each $item in $prop{
+      #{$item}: darken($clr, 20%); 
+    }
+  }
+}
+
+@mixin pseudo(){
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right:0;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+@mixin beforePseudo($size: 100%){
+  &:before{
+    content: '';
+    position: absolute;
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: $size;
+    height: $size;
+    @content;
+  }
+}
+@mixin afterPseudo($size: 100%){
+  &:after{
+    content: '';
+    position: absolute;
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: $size;
+    height: $size;
+    @content;
+  }
+}
+
+// base pseudo hover
+@mixin bsContainerHover($transi: $baseTransi){
+  &{
+    position: relative;
+    transform-style: preserve-3d;
+    perspective: 500px;
+  }
+  &:before{
+    content:'';
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    top: 0;
+    left: 50%;
+    z-index: 2;
+    transition: 450ms ease-in-out 0.1s;
+    opacity: 1;
+    transition: $transi;
+    transform-origin: left;
+    transform: rotateY(180deg);
+}
+&:after{
+    content:'';
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    top: 0;
+    right: 0;
+    z-index: 1;
+    transition: 450ms ease-in-out 0.1s;
+    opacity: 1;
+    transition: $transi; 
+    transform-origin: right;
+    transform: rotateY(-180deg);
+}
+  &:hover{
+    &:before{
+        transform: rotateY(0deg); //in
+    }
+    &:after{
+        transform: rotateY(0deg); //in
+    }
+  }
+}
+
+
+// v => how much overlayAttributes | 2 = before and after
+@mixin imgOverlay($v: 1, $prop: 'background', $clr: 'overlay'){
+  &:before{
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-repeat: no-repeat;
+    background-size: cover;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+  }
+  @if $v == 2{
+    &:after{
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      background-repeat: no-repeat;
+      background-size: cover;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+  } 
+  &:before, &:after{
+    @include themed($prop,$clr);
+  }
+}
+
+@mixin baseImg($bgA: fixed){
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-attachment: $bgA;
+}
+// doesnt work on transform Elements
+@mixin flipItem($achsis: x){
+  $input: to-upper-case($achsis);
+  @warn $input;
+  @if $input == X{
+    transform: scaleX(-1);
+  }
+  @if $input == Y{
+    transform: scaleY(-1);
+  }
+}
+
+@mixin align($dir: center){
+  align-items: $dir;
+  align-content: $dir;
+}
+@mixin justify($dir: center){
+  justify-items: $dir;
+  justify-content: $dir;
+}
+
+@mixin navItem(){
+  border-top: $baseBorder;
+
+  @include breakpoint($navBreak){
+    border-top: 0;
+  }
+}
+
+
+@mixin pageGrid(){
+  display: grid;
+  grid-template-columns: map-get(map-get($GridConfig, cols), base);
+  grid-template-rows: 
+    map-get(map-get($GridConfig, row), header)
+    map-get(map-get($GridConfig, row), main) 
+    map-get(map-get($GridConfig, row), footer);
+  grid-template-areas: "header"
+                        "main"
+                        "footer";
+  @include breakpoint(#{map-get(map-get($GridConfig, swaps), first)}){
+    grid-template-columns: repeat(#{map-get(map-get($GridConfig, cols), medium)}, #{map-get($GridConfig, colW)});
+  }
+  @include breakpoint(#{map-get(map-get($GridConfig, swaps), second)}){
+    grid-template-columns: repeat(#{map-get(map-get($GridConfig, cols), large)}, #{map-get($GridConfig, colW)});
+  }
+}
+
+@mixin contentGrid($gp: false){
+  position: relative;
+  display: grid;
+  width: 100%;
+  max-width: map-get($GridConfig, maxW);
+  
+  @if $gp == false {
+    gap: calc(#{$gap} * (#{map-get(map-get($GridConfig, cols), base)} / 2 / #{$ratio}));
+    @include breakpoint(#{map-get(map-get($GridConfig, swaps), first)}){
+      gap: calc(#{$gap} * (#{map-get(map-get($GridConfig, cols), medium)} / 2 / #{$ratio}));
+    }
+    @include breakpoint(#{map-get(map-get($GridConfig, swaps), second)}){
+      gap: calc(#{$gap} * (#{map-get(map-get($GridConfig, cols), large)} / 2 / #{$ratio}));
+    }
+  }
+
+  grid-template-columns: repeat(#{map-get(map-get($GridConfig, cols), base)}, #{map-get($GridConfig, colW)});
+  @include breakpoint(#{map-get(map-get($GridConfig, swaps), first)}){
+    grid-template-columns: repeat(#{map-get(map-get($GridConfig, cols), medium)}, #{map-get($GridConfig, colW)});
+  }
+
+  @include breakpoint(#{map-get(map-get($GridConfig, swaps), second)}){
+    grid-template-columns: repeat(#{map-get(map-get($GridConfig, cols), large)}, #{map-get($GridConfig, colW)});
+  }
+    
+}
+
+
+@mixin generateColClass(){
+  @for $i from 1 through map-get(map-get($GridConfig, cols), base){
+    .bs-col-#{$i}{
+      grid-column: span #{$i};
+    }
+  }
+  @include breakpoint(#{map-get(map-get($GridConfig, swaps), first)}){
+    @for $i from 1 through map-get(map-get($GridConfig, cols), medium){
+      .md-col-#{$i}{
+        grid-column: span #{$i};
+      }
+    }
+  }
+  
+  @include breakpoint(#{map-get(map-get($GridConfig, swaps), second)}){
+    @for $i from 1 through map-get(map-get($GridConfig, cols), large){
+      .lg-col-#{$i}{
+        grid-column: span #{$i};
+      }
+    }
+  }
+}
+
+@include generateColClass();
+
+.row{
+  @include contentGrid(false);
+  @include bsPad('x');
+  &:not(.first){
+    @include spacer();
+  }
+}
+.rowFullLeft{
+  @include contentGrid(false);
+  @include bsPad('right');
+  &:not(.first){
+    @include spacer();
+  }
+  padding-left: 0;
+}
+.rowFullRight{
+  @include contentGrid(false);
+  @include bsPad('left');
+  &:not(.first){
+    @include spacer();
+  }
+  padding-right: 0;
+}
+
+// base headline sizes and styles 
+$baseFz: 18px;
+// Line Height = LH
+$baseLH: 1.5;
+$fontSizes: (
+  h1: 42px,
+  h2: 38px,
+  h3: 34px,
+  h4: 30px,
+  h5: 26px,
+  h6: 22px,
+  p: 18px,
+);
+
+@each $selector, $size in $fontSizes{
+  .#{$selector}, #{$selector}{
+    font-size: $size;
+    line-height: calc((#{$size} * #{$ratio}) / #{$baseLH});
+    display: block;
+    text-rendering: optimizeLegibility;
+    hyphens: auto;
+    font-weight: bold;
+    position: relative;
+    margin-bottom: clamp(#{$gap}, 3vw, calc(#{$baseLH} * 1px));
+    word-wrap: break-word;
+    @include themed('color', 'text');
+    
+    @if $selector == 'p'{
+      &:after{
+        @include pseudo();
+        width: 8px;
+        top: 10%;
+        left: 100%;
+        height: 80%;
+        // background-color: $dark;
+      }
+    } 
+  }
+}
+  
+  
+  ///////////////////////////// page Styles base WF /////////////////////////
+  /// Aufbau /// 
+///   - Navi
+///   - Wrapper for contents and Tools:
+///     - Header  
+///     - Main
+///     - footer
+/// 
+///   
+/// Components ///
+///   - Main Grid
+///   - Content Grids (Text, T & I, T T, Image Grids)
+///   - Button
+///   - Cookiebanner
+///   - 
+/// 
+////////////// debug
+.overlayGrid{
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 3000;
+  max-width: $maxWidth;
+  left: calc((100% - $maxWidth) / 2);
+
+  div{
+    height: 100%;
+    width: 5px;
+    background: rgba(0, 213, 255, 0.6);
+    border: $baseBorder;
+  }
+}
+
+// #toVars
+
+// main grid
+.pageWrap{
+  position: relative;
+  z-index: 4500;
+  width: 100vw;
+  max-width: $maxWidth;
+  margin: 0 auto;
+  overflow: hidden;
+  
+  display: grid;
+  grid-template-rows: 
+  map-get(map-get($GridConfig, row), header)
+  map-get(map-get($GridConfig, row), main) 
+  map-get(map-get($GridConfig, row), footer);
+  grid-template-areas: "header"
+  "main"
+  "footer";
+  
+  header, main, footer{
+    position: relative;
+    border: $baseBorder;
+  }
+  #header{
+    grid-area: header;
+    margin-top: $naviH;
+  }
+  #main{
+    grid-area: main;
+    @include spacer();
+    @include themed('background', 'secondary')
+  }
+  #footer{
+    grid-area: footer;
+  }
+
+}
+
+.contentGrid{
+  position: relative;
+  display: grid;
+  width: 100%;
+  height: 100%;
+  @include bsGap();
+  
+  grid-template-columns: repeat(#{map-get(map-get($GridConfig, cols), base)}, #{map-get($GridConfig, colW)});
+  
+  .spanFull{
+    grid-column: span #{map-get(map-get($GridConfig, cols), base)};
+  }
+  
+  @include breakpoint(#{map-get(map-get($GridConfig, swaps), first)}){
+
+    grid-template-columns: repeat(#{map-get(map-get($GridConfig, cols), medium)}, #{map-get($GridConfig, colW)});
+    
+    .spanFull{
+      grid-column: span #{map-get(map-get($GridConfig, cols), medium)};
+    }
+  }
+  @include breakpoint(#{map-get(map-get($GridConfig, swaps), second)}){
+    grid-template-columns: repeat(#{map-get(map-get($GridConfig, cols), large)}, #{map-get($GridConfig, colW)});
+    
+    .spanFull{
+      grid-column: span #{map-get(map-get($GridConfig, cols), large)};
+    }
+  }
+
+  .testDiv{
+    background: blueviolet;
+    width: 100%;
+    height: max(30vh, 100%);
+  }
+}
+
+
+
+
+//// Navigation
+/// JS: 
+///   - add classes: open => naviWrap && on => hamburger && noScroll => body
+
+#navi{
+  position: fixed;
+  z-index: 5000;
+  width: 100%;
+
+  // edit on mixin -> if navFull == false maxW: $mw
+  @if $navFull == false{
+    @include breakpoint(full){
+      max-width: $maxWidth;
+      left: calc((100% - $maxWidth) / 2); 
+    }
+  }
+
+  // nav grid
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-areas: "logo mods";
+  column-gap: calc($gap * 6);
+  height: $naviH;
+
+  @include breakpoint(#{$navBreak}){
+    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-rows: 100%;
+    grid-template-areas: "logo navi mods";
+  }
+  
+  border: $baseBorder;
+  padding: $basePad;
+
+  @include themed('background', "light");
+
+  // base elements 
+  .branding{
+    display: block;
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    background: yellow;
+    grid-area: logo;
+  }
+
+  .mods{
+    display: flex;
+    grid-area: mods;
+    align-items: center;
+    justify-content: flex-end;
+    gap: $gap;    
+  }
+
+  .hamburger{
+    width: 50px;
+    height: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    position: relative;
+    z-index: 4600;
+    
+    .line{
+      width: 100%;
+      height: 3px;
+      background: lighten($cFill,20%);
+      transition: transform, width $baseTransi;
+      transform-origin: center;
+      pointer-events: none;
+    }
+    body.noScroll &{
+      align-items: center;
+      justify-content: center;
+      :nth-child(1).line{
+        display: none;
+      }
+      :nth-child(3).line{
+        display: none;
+      }
+      :nth-child(2).line{
+        width: 100%;
+        height: 100%;
+        border: $baseBorder;
+        border-radius: $borderRadius;
+      }
+    }
+    &:hover{
+      .line{
+        background: complement($cFill);
+      }
+    }
+    &:focus{
+      .line{
+        background: complement($cFill);
+        @include pseudoAttr(red, background);
+      }
+    }
+  }
+
+  // mobile navi element
+  .naviWrap{
+    position: fixed;
+    left: 100%;
+    top: $naviH;
+    width: 100vw;
+    height: calc(100vh - #{$naviH});
+    border: $baseBorder;
+    grid-area: navi;
+
+    @include breakpoint(base, #{$navBreak}){
+      @include themed('background', 'bg');
+      body.noScroll &{
+        visibility: visible;
+        pointer-events: all;
+        opacity: 1;
+        overflow: hidden;
+        z-index: 4500;
+        transform: translateX(-100%);
+      }
+    }
+    
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    align-content: flex-start;
+    justify-content: flex-start;
+    padding: $gap;
+    transition: all $baseTransi;
+    visibility: hidden;
+    pointer-events: none;
+    opacity: 0;
+    z-index: -1;
+    transform: translateX(110%);
+    
+    ul.navlist{
+      display: flex;
+      flex-direction: column;
+      align-items: end;
+      justify-content: flex-start;
+      list-style-type: none;
+      gap: $gap;
+      @include themed('color', 'text');
+      
+      li{
+        @include navItem();
+      }
+    }
+  }
+  // navi breakpoint - mobile to desktop 
+  @include breakpoint(#{$navBreak}){
+    .naviWrap{
+      flex-direction: row;
+      position: relative;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      visibility: visible;
+      pointer-events: all;
+      opacity: 1;
+      overflow: hidden;
+      transform: translateX(-100%);
+      padding: 0;
+      align-items: center;
+      justify-content: center;
+      gap: calc(#{$gap} * 2) $gap;
+      
+      ul.navlist{
+        flex-direction: row;
+        justify-self: center;
+        align-self: center;
+      }
+    }
+    .hamburger{
+      display: none;
+    }
+  }  
+}
+
+.themeSwitch{
+  @include themed('background', 'card');
+  border-radius: $borderRadius;
+  width: 40px;
+  height: 40px;
+}
+
+#header{
+  display: flex;
+  align-items: end;
+  justify-content: center;
+  padding-bottom: clamp(calc(#{$gap}*8),-10vw,calc(#{$gap}*6));
+  background: red;
+  position: relative;
+  z-index: 1;
+  // @include imgOverlay($v: 2);
+  @include bsContainerHover();
+
+  .claim{
+    text-align: center;
+    position: relative;
+    z-index: 3;
+  }
+}
+
+/////// page components
+
+.card{
+  background: $cFill;
+  border: $baseBorder;
+  border-radius: $borderRadius;
+  min-height: 500px;
+  
+}
+
+/////// styles
+
+* {
+  margin: 0;
+  padding: 0;
+
+  &,
+  &:before,
+  &:after {
+    box-sizing: inherit;
+  }
+}
+
+::selection {
+  // color: $primary;
+  // background: $dark;
+}
+::-moz-selection {
+  // color: $primary;
+  // background: $dark;
+}
+
+html::-webkit-scrollbar{
+  width: 10px;
+}
+html::-webkit-scrollbar-track{
+  background: #333;
+}
+html::-webkit-scrollbar-thumb{
+  background: #fff;
+}
+html {
+  box-sizing: border-box;
+  // color: $dark;
+  font-family: $mainFont;
+  font-size: $gap;
+  hyphens: manual;
+  line-height: $baseLH;
+  scroll-behavior: smooth;
+  text-rendering: optimizeLegibility;
+  /* disable text resize in landscape. e.g. on iphone */
+  text-size-adjust: none;
+  font-family: sans-serif;
+  @include themed('background', 'bg' );
+  ;
+}
+img{
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+a{
+  // color: $dark;
+  // text-decoration: 2px underline $dark;
+  text-underline-offset: 7px;
+  transition: inherit;
+  transition: text-decoration ease-in-out 400ms 800ms, text-underline-offset ease-in 800ms;
+  word-break: break-word;
+}
+////// globals
+dl {
+  dt,
+  dd {
+    display: block;
+    padding: rem(15px);
+  }
+
+  dt {
+    padding-bottom: 0;
+    font-weight: bold;
+    margin-top: $gap;
+  }
+
+  dd {
+    padding-top: 0;
+
+    + dt {
+      margin-top: rem(10px);
+    }
+
+    + dd {
+      margin-top: rem(-15px);
+    }
+  }
+}
+
+a {
+  color: $cFill;
+  word-wrap: break-word;
+  text-decoration: none;
+  transition: cubic-bezier(0.39, 0.575, 0.565, 1) 300ms;
+
+  &:hover {
+    color: darken($cFill, 15%);
+    text-decoration: none;
+    text-underline-offset: 3px;
+  }
+  &:focus {
+    color: darken($cFill, 50%);
+  }
+  &:active {
+    color: darken($cFill, 30%);
+  }
+
+  img {
+    border: none;
+  }
+
+  &[href^="tel"] {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+.btn {
+  background: $cFill;
+  border: none;
+  color: $cFill;
+  cursor: pointer;
+  display: inline-block;
+  font-size: $baseFz;
+  line-height: $baseLH;
+  padding: $basePad;
+  text-align: center;
+  text-decoration: none;
+  font-family: $mainFont;
+  text-transform: uppercase;
+  font-weight: bold;
+
+  &:hover {
+    background: $cFill;
+    color: $cFill;
+  }
+  &:active {
+    background: lighten($cFill, 30%);
+    color: $cFill;
+  }
+  &:focus {
+    background: lighten($cFill, 45%);
+    color: $cFill;
+  }
+
+  *[class^="icon"] {
+    margin-left: 0.5rem;
+    vertical-align: middle;
+  }
+
+  @include pseudoAttr(red, background, color)
+}
+
+/////// helpers || globals
+/// class generation for anything => mixins in functions
+/// Contents: 
+///   - Flex (mixin)
+///   - Grids
+///   - colors
+///   - borders
+///   - spacer
+///   - adjustments => adj
+
+.noScroll{
+  overflow: hidden;
+}
+.invisible{
+  visibility: hidden;
+  opacity: 0;
+}
+.visible{
+  visibility: visible;
+  opacity: 1;
+}
+
+.removed{
+  visibility: visible;
+  opacity: 1;
+  display: none;
+  pointer-events: none;
+}
+
+.add{
+  visibility: visible;
+  opacity: 1;
+  pointer-events: all;
+}
+
+.mb{
+  margin-bottom: calc(#{$gap} / #{$ratio});
+}
+
